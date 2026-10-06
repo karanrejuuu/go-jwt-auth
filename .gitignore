@@ -1,3 +1,4 @@
+bin/
 .env
-vendor/
-*.exe
+.DS_Store
+*.log
