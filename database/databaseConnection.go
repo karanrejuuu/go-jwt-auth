@@ -3,12 +3,14 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func DBinstance() *mongo.Client {
@@ -17,4 +19,25 @@ func DBinstance() *mongo.Client {
 		log.Fatal("Error loading .env file")
 	}
 	MongoDb := os.Getenv("MONGODB_URL")
+
+	mongo.NewClient(options.Client().ApplyURI(MongoDb))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to MongoDB")
+	return client
+}
+
+var Client *mongo.client = DBinstance()
+
+func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	var collection *mongo.Collection = client.Database("").Collection(collectionName)
+	return collection
 }
